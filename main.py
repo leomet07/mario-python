@@ -5,25 +5,27 @@ pygame.init()
 winh = 500
 winw = winh
 win = pygame.display.set_mode((winw, winh))
-
+ground_texture = pygame.image.load(os.path.join("src", "ground.png"))
+mario_texture = pygame.image.load(os.path.join("src", "mario.png"))
 
 pygame.display.set_caption("Selest")
 
 
 class Rectangle:
-    def __init__(
-        self, x, y, w, h, color,
-    ):
+    def __init__(self, x, y, w, h, color, texture):
         self.x = x
         self.y = y
         self.w = w
         self.h = h
         self.color = color
+        self.texture = texture
 
 
 class Player(Rectangle):
-    def __init__(self, x, y, w, h, color, x_vel, y_vel, x_max_vel=0, y_max_vel=0):
-        Rectangle.__init__(self, x, y, w, h, color)
+    def __init__(
+        self, x, y, w, h, color, texture, x_vel, y_vel, x_max_vel=0, y_max_vel=0
+    ):
+        Rectangle.__init__(self, x, y, w, h, color, texture)
         self.x_vel = x_vel
         self.y_vel = y_vel
         self.x_max_vel = x_max_vel
@@ -58,8 +60,8 @@ class Player(Rectangle):
             self.x_vel += 1
 
 
-ground = Rectangle(0, 450, 500, 50, [0, 255, 0])
-player = Player(100, 50, 20, 20, [255, 0, 0], 5, 0, 5, 5)
+ground = Rectangle(0, 450, 500, 50, [0, 255, 0], ground_texture)
+player = Player(100, 50, 20, 30, [255, 0, 0], mario_texture, 0, 0, 5, 5)
 
 
 def update():
@@ -77,16 +79,18 @@ def update():
 
             player.y_vel = player.y_vel + amnt
 
-        print(player.y_vel)
-
 
 def draw():
 
-    win.fill([255, 255, 255])
+    win.fill([146, 144, 255])
 
-    pygame.draw.rect(win, ground.color, [ground.x, ground.y, ground.w, ground.h], 0)
+    # pygame.draw.rect(win, ground.color, [ground.x, ground.y, ground.w, ground.h], 0)
+    char = pygame.transform.scale(ground.texture, (ground.w, ground.h))
+    win.blit(char, (ground.x, ground.y))
 
-    pygame.draw.rect(win, player.color, [player.x, player.y, player.w, player.h], 0)
+    # pygame.draw.rect(win, player.color, [player.x, player.y, player.w, player.h], 0)
+    char = pygame.transform.scale(player.texture, (player.w, player.h))
+    win.blit(char, (player.x, player.y))
 
     pygame.display.update()
 

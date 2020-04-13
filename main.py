@@ -136,6 +136,12 @@ player = Player(100, 50, 20, 30, [255, 0, 0], mario_texture, world_gravity,0, 0,
 pipe = Rectangle(100, 390, 100, 20, [0, 255, 0], None)
 pipes = []
 
+class ViewObject():
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+camera = ViewObject(200,0)
 
 for i in range(0,5):
     y = i * 90 + 40
@@ -170,10 +176,10 @@ def draw():
 
     # pygame.draw.rect(win, player.color, [player.x, player.y, player.w, player.h], 0)
     char = pygame.transform.scale(player.texture, (player.w, player.h))
-    win.blit(char, (player.x, player.y))
+    win.blit(char, (player.x , player.y ))
 
     for piped in pipes:
-        pygame.draw.rect(win, piped.color, [piped.x, piped.y, piped.w, piped.h], 0)
+        pygame.draw.rect(win, piped.color, [piped.x , piped.y , piped.w, piped.h], 0)
         
 
     pygame.display.update()

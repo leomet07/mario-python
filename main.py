@@ -85,7 +85,7 @@ class Player(Rectangle):
 
     def is_enity_above_too_low(self, pipes):
         for entity in pipes:
-            if player.y - self.total_jump_height < entity.y + entity.h and (
+            if self.y - self.total_jump_height < entity.y + entity.h and (
                 self.x + self.w > entity.x and self.x + self.w < entity.x + entity.w
             ):
                 # enitiy is above
@@ -170,7 +170,7 @@ class Player(Rectangle):
                     self.x_vel = 0
 
                     # to teloport (sharply)
-                    self.x += entity.x - self.x - self.w - 1
+                    self.x += entity.x - self.x - self.w - 5
                     # comment out to stop early
 
         return allow
@@ -196,7 +196,7 @@ class Player(Rectangle):
                     self.x_vel = 0
 
                     # to teloport (sharply)
-                    self.x += entity.x + entity.w - self.x + 1
+                    self.x += entity.x + entity.w - self.x + 10
                     # comment out to stop early
 
         return allow

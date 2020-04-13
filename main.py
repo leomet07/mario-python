@@ -89,16 +89,15 @@ class Player(Rectangle):
                 self.x + self.w > entity.x and self.x + self.w < entity.x + entity.w
             ):
                 # enitiy is above
-                print(entity.y, entity.h, entity.x)
-                print(player.y - self.total_jump_height)
+                # print(entity.y, entity.h, entity.x)
+                # print(player.y - self.total_jump_height)
 
                 return True
         return False
 
     def allow_jump(self, ground, pipes):
         allow_jump = False
-        print(self.check_gravity_collide(ground, pipes))
-        print(not (self.is_enity_above_too_low(pipes)))
+
         if self.check_gravity_collide(ground, pipes) and not (
             self.is_enity_above_too_low(pipes)
         ):
@@ -155,10 +154,12 @@ class Player(Rectangle):
         # print(entities[-1].x)
         allow = True
         for entity in entities:
-            print(self.total_x_movement)
 
             # if on the players right move the playere will be inside eniity, DONT MOVE
-            if self.x + self.w + self.total_x_movement >= entity.x:
+            if (
+                self.x + self.w + self.total_x_movement >= entity.x
+                and self.x + self.w + self.total_x_movement <= entity.x + entity.w
+            ):
 
                 # check if feet will be inside entity
                 # if head inside or feet inside
@@ -170,6 +171,32 @@ class Player(Rectangle):
 
                     # to teloport (sharply)
                     self.x += entity.x - self.x - self.w - 1
+                    # comment out to stop early
+
+        return allow
+
+    def allow_left_move(self, entities):
+        print("Allow left move")
+        # print(entities[-1].x)
+        allow = True
+        for entity in entities:
+
+            # if on the players right move the playere will be inside eniity, DONT MOVE
+            if (
+                self.x + -self.total_x_movement <= entity.x + entity.w
+                and self.x - self.total_x_movement >= entity.x
+            ):
+
+                # check if feet will be inside entity
+                # if head inside or feet inside
+                if (self.y > entity.y and self.y < entity.y + entity.h) or (
+                    self.y + self.h > entity.y and self.y + self.h < entity.y + entity.h
+                ):
+                    allow = False
+                    self.x_vel = 0
+
+                    # to teloport (sharply)
+                    self.x += entity.x + entity.w - self.x + 1
                     # comment out to stop early
 
         return allow
@@ -191,12 +218,12 @@ class ViewObject:
 
 camera = ViewObject(200, 0)
 
-for i in range(0, 5):
-    x = i * 90 + 100
+for i in range(0, 2):
+    x = i * 170 + 100
 
     pipes.append(Rectangle(x, 100, 50, 50, [0, 255, 0], pipe_texture))
 
-pipes.append(Rectangle(250, 300, 50, 200, [0, 255, 0], pipe_texture))
+pipes.append(Rectangle(250, 400, 50, 200, [0, 255, 0], pipe_texture))
 
 
 def update():
@@ -239,7 +266,7 @@ clock = pygame.time.Clock()
 
 run = True
 while run:
-    clock.tick(30)
+    clock.tick(60)
     for event in pygame.event.get():
 
         # check if window was losed to stop the game loop
@@ -256,6 +283,7 @@ while run:
                 player.x_vel = player.x_max_vel
     if keys[pygame.K_LEFT]:
         # 15 is the total amount moved
+        print(player.allow_left_move(pipes))
         if player.x_vel > -player.x_max_vel:
             player.x_vel = -player.x_max_vel
     if keys[pygame.K_UP]:

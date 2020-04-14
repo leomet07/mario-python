@@ -68,60 +68,72 @@ class Player(Rectangle):
 
         print(self.total_x_movement)
 
-    def check_gravity_collide(self, rect, pipes):
+    def check_gravity_collide(self, rect, entities):
         is_on_something = False
         if self.y + self.h >= rect.y and self.y + self.h <= rect.y + rect.h:
             is_on_something = True
 
-        for pipe in pipes:
+        for entity in entities:
             if (
-                self.y + self.h >= pipe.y
-                and self.y + self.h <= pipe.y + pipe.h
-                and self.x + self.w >= pipe.x
-                and self.x + self.w <= pipe.x + pipe.w
+                self.y + self.h >= entity.y
+                and self.y + self.h <= entity.y + entity.h
+                and self.x + self.w >= entity.x
+                and self.x + self.w <= entity.x + entity.w
             ):
                 is_on_something = True
         return is_on_something
 
-    def is_enity_above_too_low(self, pipes):
-        for entity in pipes:
-            if self.y - self.total_jump_height < entity.y + entity.h and (
+    def is_enity_above_too_low(self, entities):
+        for entity in entities:
+            if self.y + self.total_jump_height < entity.y + entity.h and (
                 self.x + self.w > entity.x and self.x + self.w < entity.x + entity.w
             ):
                 # enitiy is above
-                # print(entity.y, entity.h, entity.x)
-                # print(player.y - self.total_jump_height)
+                print("-----")
+                print(self.y + self.total_jump_height)
+                print(entity.y)
 
                 return True
         return False
 
-    def allow_jump(self, ground, pipes):
+    def allow_jump(self, ground, entities):
         allow_jump = False
 
-        if self.check_gravity_collide(ground, pipes) and not (
-            self.is_enity_above_too_low(pipes)
+        # print(self.check_gravity_collide(ground, entities), not (self.is_enity_above_too_low(entities)),)
+
+        if self.check_gravity_collide(ground, entities) and not (
+            self.is_enity_above_too_low(entities)
         ):
             allow_jump = True
 
         return allow_jump
 
-    def update(self, ground, pipes):
+    def update(self, ground, entities):
 
         # if going to fall through, dont
 
         allow_y_vel = False
 
         # if legs are below pipe top and above pipe bottom
-        for pipe in pipes:
+        for entity in entities:
             # if going the velociy will make u go through the entity, just teloport to the entity top (make it seem like u hit the ground and stopped)
-            if (
-                (self.y + self.y_vel + self.h > pipe.y)
-                and (self.y + self.y_vel + self.h < pipe.y + pipe.h)
-                and (self.x + self.w >= pipe.x and self.x <= pipe.x + pipe.w)
+            if (self.y + self.y_vel + self.h > entity.y) and (
+                self.y + self.y_vel + self.h < entity.y + entity.h
             ):
-                allow_y_vel = False
-                self.y += pipe.y - (self.y + self.h)
-                self.y_vel = 0
+                if self.x + self.w >= entity.x and self.x <= entity.x + entity.w:
+
+                    allow_y_vel = False
+                    self.y += entity.y - (self.y + self.h)
+                    self.y_vel = 0
+
+                # if moving left into entity, check if u will move into it
+                if self.x_vel < -3:
+                    if (
+                        self.x + self.x_vel < entity.x + entity.w
+                        and self.x + self.x_vel + self.w > entity.x
+                    ):
+
+                        self.x_vel = 0
 
         # ground collsion doesnt require x checking
         # if going the velociy will make u go through the ground top, just teloport to the ground (make it seem like u hit the ground and stopped)
@@ -176,15 +188,15 @@ class Player(Rectangle):
         return allow
 
     def allow_left_move(self, entities):
-        print("Allow left move")
+        # print("Allow left move")
         # print(entities[-1].x)
         allow = True
         for entity in entities:
 
             # if on the players right move the playere will be inside eniity, DONT MOVE
             if (
-                self.x + -self.total_x_movement <= entity.x + entity.w
-                and self.x - self.total_x_movement >= entity.x
+                self.x + -self.total_x_movement < entity.x + entity.w
+                and self.x - self.total_x_movement > entity.x
             ):
 
                 # check if feet will be inside entity
@@ -207,7 +219,7 @@ player = Player(
     100, 50, 20, 30, [255, 0, 0], mario_texture, world_gravity, 0, 0, 6, 5, 20, 1
 )
 
-pipes = []
+entities = []
 
 
 class ViewObject:
@@ -221,19 +233,19 @@ camera = ViewObject(200, 0)
 for i in range(0, 2):
     x = i * 170 + 100
 
-    pipes.append(Rectangle(x, 100, 50, 50, [0, 255, 0], pipe_texture))
+    entities.append(Rectangle(x, 100, 50, 50, [0, 255, 0], pipe_texture))
 
-pipes.append(Rectangle(250, 400, 50, 200, [0, 255, 0], pipe_texture))
+entities.append(Rectangle(250, 400, 50, 200, [0, 255, 0], pipe_texture))
 
 
 def update():
-    player.update(ground, pipes)
+    player.update(ground, entities)
 
     # add one round of graviy to check if you will fall through
 
     # player.y += player.y_vel
 
-    if player.check_gravity_collide(ground, pipes):
+    if player.check_gravity_collide(ground, entities):
 
         player.y_vel = 0
     else:
@@ -254,10 +266,10 @@ def draw():
     char = pygame.transform.scale(player.texture, (player.w, player.h))
     win.blit(char, (player.x, player.y))
 
-    for piped in pipes:
-        # pygame.draw.rect(win, piped.color, [piped.x, piped.y, piped.w, piped.h], 0)
-        char = pygame.transform.scale(piped.texture, (piped.w, piped.h))
-        win.blit(char, (piped.x, piped.y))
+    for entity in entities:
+        pygame.draw.rect(win, entity.color, [entity.x, entity.y, entity.w, entity.h], 0)
+        char = pygame.transform.scale(entity.texture, (entity.w, entity.h))
+        win.blit(char, (entity.x, entity.y))
 
     pygame.display.update()
 
@@ -278,18 +290,18 @@ while run:
 
         # print(player.allow_right_move(pipes))
         # 15 is the total amount moved
-        if player.allow_right_move(pipes):
+        if player.allow_right_move(entities):
             if player.x_vel < player.x_max_vel:
                 player.x_vel = player.x_max_vel
     if keys[pygame.K_LEFT]:
         # 15 is the total amount moved
-        print(player.allow_left_move(pipes))
-        if player.x_vel > -player.x_max_vel:
+        print(player.allow_left_move(entities))
+        if player.x_vel > -player.x_max_vel + -4:
             player.x_vel = -player.x_max_vel
     if keys[pygame.K_UP]:
 
         # print(player.allow_jump(ground, pipes))
-        if player.allow_jump(ground, pipes):
+        if player.allow_jump(ground, entities):
             player.y_vel = player.jump_height
     # run update after key recog
     update()

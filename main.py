@@ -247,7 +247,7 @@ class ViewObject:
 camera = ViewObject(200, 0)
 
 for i in range(0, 2):
-    x = i * 170 + 100
+    x = i * 110 + 100
 
     entities.append(Rectangle(x, 100, 50, 50, [0, 255, 0], pipe_texture))
 

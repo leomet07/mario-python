@@ -285,7 +285,7 @@ def draw():
     win.blit(char, (player.x, player.y))
 
     for entity in entities:
-        pygame.draw.rect(win, entity.color, [entity.x, entity.y, entity.w, entity.h], 0)
+        # pygame.draw.rect(win, entity.color, [entity.x, entity.y, entity.w, entity.h], 0)
         char = pygame.transform.scale(entity.texture, (entity.w, entity.h))
         win.blit(char, (entity.x, entity.y))
 

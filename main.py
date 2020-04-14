@@ -134,23 +134,6 @@ class Player(Rectangle):
 
                 # if moving left into entity, check if u will move into it
 
-                if self.x_vel < -4:
-                    if (
-                        self.x + self.x_vel <= entity.x + entity.w
-                        and self.x + self.x_vel + self.w >= entity.x
-                    ):
-                        if self.y + self.h > entity.y + 1:
-                            # to still allow jumping
-
-                            if True:
-
-                                self.x_vel = 0
-
-                                if self.is_enity_above_too_low(entities):
-                                    # tp head out of entity
-                                    pass
-                                    #self.y = entity.y + entity.h + 1
-
         # ground collsion doesnt require x checking
         # if going the velociy will make u go through the ground top, just teloport to the ground (make it seem like u hit the ground and stopped)
         if self.y + self.y_vel + self.h < ground.y:
@@ -165,14 +148,7 @@ class Player(Rectangle):
 
         self.x += self.x_vel
 
-        # add friction
-        """
-        if self.y_vel > 0:
-            self.y_vel -= 1
-        elif self.y_vel < 0:
-            self.y_vel += 1
-        """
-
+        # friction as to not slide off the map
         if self.x_vel > 0:
             self.x_vel -= self.friction
         elif self.x_vel < 0:
@@ -208,7 +184,6 @@ class Player(Rectangle):
         # print(entities[-1].x)
         allow = True
         for entity in entities:
-            print("get out")
 
             # if on the players right move the playere will be inside eniity, DONT MOVE
             if (
@@ -308,7 +283,7 @@ while run:
     player.clicked_jump = False
     keys = pygame.key.get_pressed()
     if keys[pygame.K_UP]:
-        print("jump clicked")
+        # print("jump clicked")
 
         if player.allow_jump(ground, entities):
             player.clicked_jump = True

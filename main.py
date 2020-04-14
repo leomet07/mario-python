@@ -141,15 +141,15 @@ class Player(Rectangle):
                     ):
                         if self.y + self.h > entity.y + 1:
                             # to still allow jumping
-                            print(self.clicked_jump)
+
                             if True:
-                                print("tp")
 
                                 self.x_vel = 0
 
                                 if self.is_enity_above_too_low(entities):
                                     # tp head out of entity
-                                    self.y = entity.y + entity.h + 1
+                                    pass
+                                    #self.y = entity.y + entity.h + 1
 
         # ground collsion doesnt require x checking
         # if going the velociy will make u go through the ground top, just teloport to the ground (make it seem like u hit the ground and stopped)
@@ -208,11 +208,12 @@ class Player(Rectangle):
         # print(entities[-1].x)
         allow = True
         for entity in entities:
+            print("get out")
 
             # if on the players right move the playere will be inside eniity, DONT MOVE
             if (
                 self.x + -self.total_x_movement <= entity.x + entity.w
-                and self.x - self.total_x_movement >= entity.x
+                and self.x + self.w - self.total_x_movement >= entity.x
             ):
 
                 # check if feet will be inside entity
@@ -220,11 +221,12 @@ class Player(Rectangle):
                 if (self.y > entity.y and self.y < entity.y + entity.h) or (
                     self.y + self.h > entity.y and self.y + self.h < entity.y + entity.h
                 ):
+
                     allow = False
                     self.x_vel = 0
 
                     # to teloport (sharply)
-                    self.x += entity.x + entity.w - self.x + 10
+                    self.x = entity.x + entity.w + 3
                     # comment out to stop early
 
         return allow
@@ -256,7 +258,7 @@ entities.append(Rectangle(250, 300, 50, 50, [0, 255, 0], pipe_texture))
 
 
 def update():
-    print(player.x_vel)
+
     player.update(ground, entities)
 
     # add one round of graviy to check if you will fall through
@@ -321,8 +323,9 @@ while run:
     if keys[pygame.K_LEFT]:
         # 15 is the total amount moved
         # print(player.allow_left_move(entities))
-        if player.x_vel > -player.x_max_vel + -4:
-            player.x_vel = -player.x_max_vel
+        if player.allow_left_move(entities):
+            if player.x_vel > -player.x_max_vel + -4:
+                player.x_vel = -player.x_max_vel
 
     # run update after key recog
     update()

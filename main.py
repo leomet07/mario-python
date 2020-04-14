@@ -48,6 +48,7 @@ class Player(Rectangle):
         self.x_max_vel = x_max_vel
         self.y_max_vel = y_max_vel
         self.jump_height = jump_height * -1
+        self.clicked_jump = False
 
         test_vel = self.jump_height
         self.total_jump_height = 0
@@ -84,22 +85,23 @@ class Player(Rectangle):
         return is_on_something
 
     def is_enity_above_too_low(self, entities):
+
         for entity in entities:
-            if self.y + self.total_jump_height < entity.y + entity.h and (
-                self.x + self.w > entity.x and self.x + self.w < entity.x + entity.w
+            # enitiy is above
+
+            if (
+                self.y + self.total_jump_height < entity.y + entity.h
+                and self.y + self.h > entity.y
+                and (
+                    self.x + self.w > entity.x and self.x + self.w < entity.x + entity.w
+                )
             ):
-                # enitiy is above
-                print("-----")
-                print(self.y + self.total_jump_height)
-                print(entity.y)
 
                 return True
         return False
 
     def allow_jump(self, ground, entities):
         allow_jump = False
-
-        # print(self.check_gravity_collide(ground, entities), not (self.is_enity_above_too_low(entities)),)
 
         if self.check_gravity_collide(ground, entities) and not (
             self.is_enity_above_too_low(entities)
@@ -120,20 +122,34 @@ class Player(Rectangle):
             if (self.y + self.y_vel + self.h > entity.y) and (
                 self.y + self.y_vel + self.h < entity.y + entity.h
             ):
-                if self.x + self.w >= entity.x and self.x <= entity.x + entity.w:
+                if self.x + self.w > entity.x and self.x < entity.x + entity.w:
+                    # only tp to top if moving down
+                    if self.y_vel > 0:
+                        allow_y_vel = False
+                        self.y += entity.y - (self.y + self.h)
+                        self.y_vel = 0
 
-                    allow_y_vel = False
-                    self.y += entity.y - (self.y + self.h)
-                    self.y_vel = 0
+                    elif self.y_vel < 0:  # if moving up
+                        self.y_vel = 0
 
                 # if moving left into entity, check if u will move into it
-                if self.x_vel < -3:
-                    if (
-                        self.x + self.x_vel < entity.x + entity.w
-                        and self.x + self.x_vel + self.w > entity.x
-                    ):
 
-                        self.x_vel = 0
+                if self.x_vel < -4:
+                    if (
+                        self.x + self.x_vel <= entity.x + entity.w
+                        and self.x + self.x_vel + self.w >= entity.x
+                    ):
+                        if self.y + self.h > entity.y + 1:
+                            # to still allow jumping
+                            print(self.clicked_jump)
+                            if True:
+                                print("tp")
+
+                                self.x_vel = 0
+
+                                if self.is_enity_above_too_low(entities):
+                                    # tp head out of entity
+                                    self.y = entity.y + entity.h + 1
 
         # ground collsion doesnt require x checking
         # if going the velociy will make u go through the ground top, just teloport to the ground (make it seem like u hit the ground and stopped)
@@ -195,8 +211,8 @@ class Player(Rectangle):
 
             # if on the players right move the playere will be inside eniity, DONT MOVE
             if (
-                self.x + -self.total_x_movement < entity.x + entity.w
-                and self.x - self.total_x_movement > entity.x
+                self.x + -self.total_x_movement <= entity.x + entity.w
+                and self.x - self.total_x_movement >= entity.x
             ):
 
                 # check if feet will be inside entity
@@ -236,9 +252,11 @@ for i in range(0, 2):
     entities.append(Rectangle(x, 100, 50, 50, [0, 255, 0], pipe_texture))
 
 entities.append(Rectangle(250, 400, 50, 200, [0, 255, 0], pipe_texture))
+entities.append(Rectangle(250, 300, 50, 50, [0, 255, 0], pipe_texture))
 
 
 def update():
+    print(player.x_vel)
     player.update(ground, entities)
 
     # add one round of graviy to check if you will fall through
@@ -284,8 +302,15 @@ while run:
         # check if window was losed to stop the game loop
         if event.type == pygame.QUIT:
             run = False
-    keys = pygame.key.get_pressed()
 
+    player.clicked_jump = False
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_UP]:
+        print("jump clicked")
+
+        if player.allow_jump(ground, entities):
+            player.clicked_jump = True
+            player.y_vel = player.jump_height
     if keys[pygame.K_RIGHT]:
 
         # print(player.allow_right_move(pipes))
@@ -295,14 +320,10 @@ while run:
                 player.x_vel = player.x_max_vel
     if keys[pygame.K_LEFT]:
         # 15 is the total amount moved
-        print(player.allow_left_move(entities))
+        # print(player.allow_left_move(entities))
         if player.x_vel > -player.x_max_vel + -4:
             player.x_vel = -player.x_max_vel
-    if keys[pygame.K_UP]:
 
-        # print(player.allow_jump(ground, pipes))
-        if player.allow_jump(ground, entities):
-            player.y_vel = player.jump_height
     # run update after key recog
     update()
     draw()

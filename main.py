@@ -8,6 +8,7 @@ win = pygame.display.set_mode((winw, winh))
 ground_texture = pygame.image.load(os.path.join("src", "ground.png"))
 mario_texture = pygame.image.load(os.path.join("src", "mario.png"))
 pipe_texture = pygame.image.load(os.path.join("src", "pipe.png"))
+lucky_texture = pygame.image.load(os.path.join("src", "lucky.png"))
 pygame.display.set_caption("Selest")
 
 world_gravity = 2
@@ -15,13 +16,14 @@ max_gravity = 15
 
 
 class Rectangle:
-    def __init__(self, x, y, w, h, color, texture):
+    def __init__(self, x, y, w, h, color, texture, type):
         self.x = x
         self.y = y
         self.w = w
         self.h = h
         self.color = color
         self.texture = texture
+        self.type = type
 
 
 class Player(Rectangle):
@@ -33,6 +35,7 @@ class Player(Rectangle):
         h,
         color,
         texture,
+        type,
         g,
         x_vel,
         y_vel,
@@ -41,7 +44,7 @@ class Player(Rectangle):
         jump_height,
         friction,
     ):
-        Rectangle.__init__(self, x, y, w, h, color, texture)
+        Rectangle.__init__(self, x, y, w, h, color, texture, type)
         self.g = g
         self.x_vel = x_vel
         self.y_vel = y_vel
@@ -79,7 +82,7 @@ class Player(Rectangle):
                 self.y + self.h >= entity.y
                 and self.y + self.h <= entity.y + entity.h
                 and self.x + self.w >= entity.x
-                and self.x + self.w <= entity.x + entity.w
+                and self.x <= entity.x + entity.w
             ):
                 is_on_something = True
         return is_on_something
@@ -92,12 +95,13 @@ class Player(Rectangle):
             if (
                 self.y + self.total_jump_height < entity.y + entity.h
                 and self.y + self.h > entity.y
-                and (
-                    self.x + self.w > entity.x and self.x + self.w < entity.x + entity.w
-                )
+                and (self.x + self.w > entity.x and self.x < entity.x + entity.w)
             ):
 
-                return True
+                # you are allowed to jump into lucky blocks so you allow to phase if luycy
+                if entity.type != "lucky":
+
+                    return True
         return False
 
     def allow_jump(self, ground, entities):
@@ -130,7 +134,10 @@ class Player(Rectangle):
                         self.y_vel = 0
 
                     elif self.y_vel < 0:  # if moving up
-                        self.y_vel = 0
+
+                        if entity.type == "lucky":
+                            self.y = entity.y + entity.h
+                            self.y_vel = 20
 
                 # if moving left into entity, check if u will move into it
 
@@ -207,9 +214,22 @@ class Player(Rectangle):
         return allow
 
 
-ground = Rectangle(0, 450, 500, 50, [0, 255, 0], ground_texture)
+ground = Rectangle(0, 450, 500, 50, [0, 255, 0], ground_texture, "ground")
 player = Player(
-    100, 50, 20, 30, [255, 0, 0], mario_texture, world_gravity, 0, 0, 6, 5, 20, 1
+    100,
+    50,
+    20,
+    30,
+    [255, 0, 0],
+    mario_texture,
+    "player",
+    world_gravity,
+    0,
+    0,
+    6,
+    5,
+    20,
+    1,
 )
 
 entities = []
@@ -226,10 +246,12 @@ camera = ViewObject(200, 0)
 for i in range(0, 2):
     x = i * 110 + 100
 
-    entities.append(Rectangle(x, 100, 50, 50, [0, 255, 0], pipe_texture))
+    entities.append(Rectangle(x, 100, 50, 50, [0, 255, 0], pipe_texture, "pipe"))
 
-entities.append(Rectangle(250, 400, 50, 200, [0, 255, 0], pipe_texture))
-entities.append(Rectangle(250, 300, 50, 50, [0, 255, 0], pipe_texture))
+entities.append(Rectangle(250, 400, 50, 200, [0, 255, 0], pipe_texture, "pipe"))
+entities.append(Rectangle(250, 300, 50, 50, [0, 255, 0], pipe_texture, "pipe"))
+
+entities.append(Rectangle(100, 350, 25, 25, [0, 255, 0], lucky_texture, "lucky"))
 
 
 def update():
@@ -252,6 +274,14 @@ def update():
 def draw():
 
     win.fill([146, 144, 255])
+
+    # draw background grids
+
+    # for dev grid
+    """
+    for index in range(0, winw, 25):
+        pygame.draw.line(win, (0, 0, 0), (index, 0), (index, winh), 1)
+    """
 
     # pygame.draw.rect(win, ground.color, [ground.x, ground.y, ground.w, ground.h], 0)
     char = pygame.transform.scale(ground.texture, (ground.w, ground.h))

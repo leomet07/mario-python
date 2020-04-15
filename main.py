@@ -129,7 +129,7 @@ class Player(Rectangle):
         for entity in entities:
             # if going the velociy will make u go through the entity, just teloport to the entity top (make it seem like u hit the ground and stopped)
             if (self.y + self.y_vel + self.h > entity.y) and (
-                self.y + self.y_vel + self.h < entity.y + entity.h
+                self.y + self.y_vel < entity.y + entity.h
             ):
                 if self.x + self.w > entity.x and self.x < entity.x + entity.w:
                     # only tp to top if moving down

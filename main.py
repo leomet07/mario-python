@@ -7,8 +7,13 @@ winw = winh
 win = pygame.display.set_mode((winw, winh))
 ground_texture = pygame.image.load(os.path.join("src", "ground.png"))
 mario_texture = pygame.image.load(os.path.join("src", "mario.png"))
+mario_texture_two = pygame.transform.flip(
+    pygame.image.load(os.path.join("src", "mario.png")), True, False
+)
 pipe_texture = pygame.image.load(os.path.join("src", "pipe.png"))
 lucky_texture = pygame.image.load(os.path.join("src", "lucky.png"))
+
+
 pygame.display.set_caption("Selest")
 
 world_gravity = 2
@@ -242,12 +247,12 @@ class ViewObject:
 
 
 camera = ViewObject(200, 0)
-
+"""
 for i in range(0, 2):
     x = i * 110 + 100
 
     entities.append(Rectangle(x, 100, 50, 50, [0, 255, 0], pipe_texture, "pipe"))
-
+"""
 entities.append(Rectangle(250, 400, 50, 200, [0, 255, 0], pipe_texture, "pipe"))
 entities.append(Rectangle(250, 300, 50, 50, [0, 255, 0], pipe_texture, "pipe"))
 

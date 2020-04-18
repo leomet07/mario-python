@@ -21,13 +21,14 @@ max_gravity = 15
 
 
 class Rectangle:
-    def __init__(self, x, y, w, h, color, texture, type):
+    def __init__(self, x, y, w, h, color, texture, texture_type, type):
         self.x = x
         self.y = y
         self.w = w
         self.h = h
         self.color = color
         self.texture = texture
+        self.texture_type = texture_type
         self.type = type
 
 
@@ -40,6 +41,7 @@ class Player(Rectangle):
         h,
         color,
         texture,
+        texture_type,
         type,
         g,
         x_vel,
@@ -49,7 +51,7 @@ class Player(Rectangle):
         jump_height,
         friction,
     ):
-        Rectangle.__init__(self, x, y, w, h, color, texture, type)
+        Rectangle.__init__(self, x, y, w, h, color, texture, texture_type, type)
         self.g = g
         self.x_vel = x_vel
         self.y_vel = y_vel
@@ -219,7 +221,7 @@ class Player(Rectangle):
         return allow
 
 
-ground = Rectangle(0, 450, 500, 50, [0, 255, 0], ground_texture, "ground")
+ground = Rectangle(0, 450, 500, 50, [0, 255, 0], ground_texture, "single", "ground")
 player = Player(
     100,
     50,
@@ -227,6 +229,7 @@ player = Player(
     30,
     [255, 0, 0],
     mario_texture,
+    "single",
     "player",
     world_gravity,
     0,
@@ -253,10 +256,16 @@ for i in range(0, 2):
 
     entities.append(Rectangle(x, 100, 50, 50, [0, 255, 0], pipe_texture, "pipe"))
 """
-entities.append(Rectangle(250, 400, 50, 200, [0, 255, 0], pipe_texture, "pipe"))
-entities.append(Rectangle(250, 300, 50, 50, [0, 255, 0], pipe_texture, "pipe"))
+entities.append(
+    Rectangle(250, 400, 50, 200, [0, 255, 0], pipe_texture, "single", "pipe")
+)
+entities.append(
+    Rectangle(250, 300, 50, 50, [0, 255, 0], pipe_texture, "single", "pipe")
+)
 
-entities.append(Rectangle(100, 350, 25, 25, [0, 255, 0], lucky_texture, "lucky"))
+entities.append(
+    Rectangle(100, 350, 25, 25, [0, 255, 0], lucky_texture, "single", "lucky")
+)
 
 
 def update():
@@ -293,8 +302,9 @@ def draw():
     win.blit(char, (ground.x, ground.y))
 
     # pygame.draw.rect(win, player.color, [player.x, player.y, player.w, player.h], 0)
-    char = pygame.transform.scale(player.texture, (player.w, player.h))
-    win.blit(char, (player.x, player.y))
+    if player.texture_type == "single":
+        char = pygame.transform.scale(player.texture, (player.w, player.h))
+        win.blit(char, (player.x, player.y))
 
     for entity in entities:
         # pygame.draw.rect(win, entity.color, [entity.x, entity.y, entity.w, entity.h], 0)

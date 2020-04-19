@@ -9,9 +9,9 @@ def generate_full_textures(dir):
 
     # if dir exiss
     if os.path.exists(dir):
-        print("Dir exists")
+        # print("Dir exists")
         subfolders_names = [f.name for f in os.scandir(dir) if f.is_dir()]
-        print(subfolders_names)
+        # print(subfolders_names)
 
         # only straight angles
         directions = ["left", "right", "up", "down"]
@@ -23,10 +23,10 @@ def generate_full_textures(dir):
             if folder_name in directions:
 
                 texture_items[folder_name] = []
-                print("-----------")
-                print("Folder path: " + folder_path)
+                # print("-----------")
+                # print("Folder path: " + folder_path)
 
-                print("Folder name: " + folder_name)
+                # print("Folder name: " + folder_name)
                 current_folder_texture_paths = []
 
                 for r, d, f in os.walk(folder_path):
@@ -38,10 +38,13 @@ def generate_full_textures(dir):
                         texture = pygame.image.load(texture_path)
                         texture_items[folder_name].append(texture)
 
-                print(texture_items[folder_name])
+                # print(texture_items[folder_name])
                 # print(current_folder_textures)
 
-    print(texture_items)
+    # print(texture_items)
+
+    return texture_items
 
 
-generate_full_textures(os.path.join("src", "mario_textures"))
+# mario_textures = generate_full_textures(os.path.join("src", "mario_textures"))
+# print(mario_textures)

@@ -1,5 +1,6 @@
 import pygame as pygame
 import os
+from generate_full_textures import generate_full_textures
 
 pygame.init()
 winh = 500
@@ -7,9 +8,8 @@ winw = winh
 win = pygame.display.set_mode((winw, winh))
 ground_texture = pygame.image.load(os.path.join("src", "ground.png"))
 mario_texture = pygame.image.load(os.path.join("src", "mario.png"))
-mario_texture_two = pygame.transform.flip(
-    pygame.image.load(os.path.join("src", "mario.png")), True, False
-)
+mario_textures = generate_full_textures(os.path.join("src", "mario_textures"))
+print("Mario texures from main: " + str(mario_textures))
 pipe_texture = pygame.image.load(os.path.join("src", "pipe.png"))
 lucky_texture = pygame.image.load(os.path.join("src", "lucky.png"))
 
@@ -79,6 +79,12 @@ class Player(Rectangle):
 
         print(self.total_x_movement)
 
+        # make texture usage helper properties
+        if self.texture_type == "x_directional":
+            for direction in self.texture:
+                print("Direction: " + str(direction))
+                self.texture_index = 0
+
     def check_gravity_collide(self, rect, entities):
         is_on_something = False
         if self.y + self.h >= rect.y and self.y + self.h <= rect.y + rect.h:
@@ -122,6 +128,20 @@ class Player(Rectangle):
         return allow_jump
 
     def update(self, ground, entities):
+        # setting texture
+        if self.texture_type == "x_directional":
+            len_of_smallest_texures_directional_arr = min(
+                len(self.texture["right"]), len(self.texture["left"])
+            )
+
+            # only change if u are moving and u crossed aboundry
+            if self.x_vel != 0 and self.x % 20 == 0:
+                if self.texture_index < len_of_smallest_texures_directional_arr - 1:
+
+                    self.texture_index += 1
+
+                else:
+                    self.texture_index = 0
 
         # if going to fall through, dont
 
@@ -221,15 +241,15 @@ class Player(Rectangle):
         return allow
 
 
-ground = Rectangle(0, 450, 500, 50, [0, 255, 0], ground_texture, "single", "ground")
+ground = Rectangle(0, winh- 50, winw, 50, [0, 255, 0], ground_texture, "single", "ground")
 player = Player(
     100,
     50,
     20,
     30,
     [255, 0, 0],
-    mario_texture,
-    "single",
+    mario_textures,
+    "x_directional",
     "player",
     world_gravity,
     0,
@@ -305,6 +325,17 @@ def draw():
     if player.texture_type == "single":
         char = pygame.transform.scale(player.texture, (player.w, player.h))
         win.blit(char, (player.x, player.y))
+    elif player.texture_type == "x_directional":
+
+        if player.x_vel >= 0:
+            direction = "right"
+        else:
+            direction = "left"
+
+        char = pygame.transform.scale(
+            player.texture[direction][player.texture_index], (player.w, player.h)
+        )
+        win.blit(char, (player.x, player.y))
 
     for entity in entities:
         # pygame.draw.rect(win, entity.color, [entity.x, entity.y, entity.w, entity.h], 0)
@@ -327,20 +358,20 @@ while run:
 
     player.clicked_jump = False
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_UP]:
+    if keys[pygame.K_UP] or keys[pygame.K_w]:
         # print("jump clicked")
 
         if player.allow_jump(ground, entities):
             player.clicked_jump = True
             player.y_vel = player.jump_height
-    if keys[pygame.K_RIGHT]:
+    if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
 
         # print(player.allow_right_move(pipes))
         # 15 is the total amount moved
         if player.allow_right_move(entities):
             if player.x_vel < player.x_max_vel:
                 player.x_vel = player.x_max_vel
-    if keys[pygame.K_LEFT]:
+    elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
         # 15 is the total amount moved
         # print(player.allow_left_move(entities))
         if player.allow_left_move(entities):
